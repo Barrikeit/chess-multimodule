@@ -1,0 +1,69 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:2345/generic
+    driverClassName: org.postgresql.Driver
+    username: user
+    password: "pass"
+    hikari:
+      pool-name: Hikari
+      auto-commit: false
+      minimum-idle: 5
+      maximum-pool-size: 10
+      datasource-properties:
+        includeSynonyms: false
+  jpa:
+    database: POSTGRESQL
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate # validate | create | create-drop | update | none
+    properties:
+      hibernate:
+        synonyms: false
+        format_sql: true
+        show_sql: true
+        default_schema: generic # or set the search_path in the database for the user
+        generate_statistics: false
+        enable_lazy_load_no_trans: true
+        id:
+          optimizer:
+            pooled:
+              preferred: none
+  session:
+    store-type: jdbc
+    jdbc:
+      initializer:
+        enabled: true
+      table-name: SPRING_SESSION
+      initialize-schema: never
+
+## Base de datos Local usando PostgreSQL 17
+## Para ello nos tendremos que conectar a la bbdd genérica de postgres usando psql, crearemos la bbdd de este proyecto llamada 'generic' y nos conectaremos a ella, creamos un usuario llamado 'user' con ciertos permisos y creamos un esquema con el mismo nombre para ese usuario e indicamos que lo utilice como default en vez de el esquema public
+## Pero primero tendremos instalar la última version de postgresql 17, ponle o no contraseña al usuario postgres y en el haz que el puerto sea 2345
+## Añade psql al PATH de Windows
+## Abre Configuración del sistema -> Variables de entorno.
+## En “Variables del sistema”, selecciona Path y haz clic en Editar.
+## Haz clic en Nuevo y añade la ruta al directorio bin C:\Program Files\PostgreSQL\17\bin
+## Acepta y cierra las ventanas
+## Hecho esto ya podríamos abrir una consola de PowerShell y ejecutar los siguientes comandos en orden:
+
+# psql -U postgres -h localhost -p 2345
+# CREATE DATABASE generic;
+# \c generic
+# CREATE ROLE "user" WITH LOGIN PASSWORD 'pass' SUPERUSER CREATEDB CREATEROLE INHERIT REPLICATION BYPASSRLS CONNECTION LIMIT -1;
+# CREATE SCHEMA IF NOT EXISTS generic AUTHORIZATION "user";
+# ALTER ROLE "user" SET search_path TO generic;
+# CREATE EXTENSION IF NOT EXISTS unaccent;
+# ALTER EXTENSION unaccent SET SCHEMA generic;
+
+## Para conectarnos a la bbdd genérica usando el nuevo usuario, ejecutaríamos el siguiente comando:
+# psql -U user -d generic -h localhost -p 2345
+
+## Si, por el contrario, queremos hacer uso de docker ejecutaríamos los siguientes comandos en orden:
+
+# docker pull postgres:17.5-alpine
+# docker run -d --name postgres_db -e POSTGRES_USER=user -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=generic -p 2345:5432 postgres:17.5-alpine
+# docker ps
+# docker exec -it postgres_db psql -U user -d generic
+# CREATE SCHEMA IF NOT EXISTS generic;
+# ALTER ROLE "user" SET search_path TO generic, public;

@@ -1,0 +1,57 @@
+application:
+  name: ${app.name:chess-ws}
+  version: ${app.version:0.1.0-SNAPSHOT}
+  build: ${app.build:local}
+  buildTime: ${app.buildTime:local}
+
+server:
+  port: 9892
+  timeZone: Europe/Madrid
+  servlet:
+    context-path: /
+    api-path: /api/v1
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-response: true
+
+spring:
+  application.name: ${app.name:chess-ws}
+  profiles:
+    default: dev
+  config:
+    import:
+      - optional:classpath:build.properties
+      - application-base.yaml
+      # application-flyway.yaml is intentionally NOT imported here.
+      # Schema migrations are managed exclusively by chess-rest.
+      - application-security.yaml
+      - optional:application-mail.yaml
+      - optional:application-${spring.profiles.active}.yaml
+  flyway:
+    enabled: false
+
+logging:
+  file:
+    path: dist/logs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: ${application.name}
+    version: ${application.version}
+    build: ${application.build}

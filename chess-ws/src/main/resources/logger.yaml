@@ -1,0 +1,5 @@
+logging:
+  file:
+    enabled: true
+    path: dist/logs
+    name: chess-ws

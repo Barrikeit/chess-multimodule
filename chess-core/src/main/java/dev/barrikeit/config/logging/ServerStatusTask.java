@@ -1,0 +1,61 @@
+package dev.barrikeit.config.logging;
+
+import dev.barrikeit.util.TimeUtil;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@AllArgsConstructor
+public class ServerStatusTask {
+
+  private final DataSource dataSource;
+
+  @Scheduled(initialDelay = 15, fixedDelay = 15, timeUnit = TimeUnit.MINUTES)
+  public void task() {
+    String currentTime = TimeUtil.formatDateTime(TimeUtil.offsetDateTimeNow());
+    log.info("Server Status - [UP]: [{}]", currentTime);
+  }
+
+  @Scheduled(initialDelay = 1, fixedDelay = 60, timeUnit = TimeUnit.MINUTES)
+  public void healthCheck() {
+    checkDatabaseConnection();
+    checkMemoryUsage();
+    checkDiskSpace();
+  }
+
+  private void checkDatabaseConnection() {
+    try (Connection connection = dataSource.getConnection()) {
+      log.info("Database connection: {}", connection.isValid(2));
+    } catch (SQLException e) {
+      log.error("Database connection check failed: {}", e.getMessage());
+    }
+  }
+
+  private void checkMemoryUsage() {
+    long totalMemory = Runtime.getRuntime().totalMemory();
+    long freeMemory = Runtime.getRuntime().freeMemory();
+    long usedMemory = totalMemory - freeMemory;
+    log.info(
+        "Memory Usage - Used: {} MB, Total: {} MB",
+        usedMemory / (1024 * 1024),
+        totalMemory / (1024 * 1024));
+  }
+
+  private void checkDiskSpace() {
+    File root = new File("/");
+    long freeSpace = root.getFreeSpace();
+    long totalSpace = root.getTotalSpace();
+    log.info(
+        "Disk Space - Free: {} MB, Total: {} MB",
+        freeSpace / (1024 * 1024),
+        totalSpace / (1024 * 1024));
+  }
+}

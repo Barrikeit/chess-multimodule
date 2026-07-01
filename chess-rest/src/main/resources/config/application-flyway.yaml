@@ -1,0 +1,8 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db
+    table: flyway_schema_history
+    validate-on-migrate: true
+    baseline-on-migrate: true
+    ignore-migration-patterns: '*:missing'

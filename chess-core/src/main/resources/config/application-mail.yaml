@@ -1,0 +1,12 @@
+mail:
+  host: ${MAIL_HOST:smtp.host.es}
+  port: ${MAIL_PORT:587}
+  user: ${MAIL_USER:user}
+  pass: ${MAIL_PASS:pass}
+  from: ${MAIL_FROM:generic@generic.es}
+  activacion-url: ${MAIL_ACTIVATION_URL:http://localhost:9891}
+  properties:
+    protocol: smtp
+    auth: true
+    starttls: true
+    debug: false
