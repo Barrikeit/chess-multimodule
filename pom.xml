@@ -13,6 +13,7 @@
         <module>chess-core</module>
         <module>chess-rest</module>
         <module>chess-ws</module>
+        <module>chess-lib</module>
     </modules>
 
     <properties>
